@@ -10,6 +10,7 @@
 	</head>
 	<body>
 		<script src="js/three.js"></script>
+		<script src="OBJLoader.js"></script>
 		<script>
 			var scene = new THREE.Scene();
             var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
@@ -20,6 +21,20 @@
             var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
             var cube = new THREE.Mesh( geometry, material );
             scene.add( cube );
+
+            var loader = new THREE.OBJLoader();
+
+                loader.load(
+                        // resource URL
+                        'expression_1.obj',
+                        // Function when resource is loaded
+                        function ( object ) {
+                                  scene.add( object ); });
+                var light = new THREE.PointLight(0xffffff);
+                light.position.set(0,100,100);
+                scene.add(light);
+
+
             camera.position.z = 5;
             function animate()
             {

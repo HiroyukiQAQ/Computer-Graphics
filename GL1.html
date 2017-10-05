@@ -11,10 +11,13 @@
 	<body>
 		<script src="js/three.js"></script>
 		<script src="OBJLoader.js"></script>
+		<script src="OrbitControls.js"></script>
 		<script>
 			var scene = new THREE.Scene();
             var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
             var renderer = new THREE.WebGLRenderer();
+            controls = new THREE.OrbitControls( camera );
+            controls.addEventListener( 'change', render );
             renderer.setSize( window.innerWidth, window.innerHeight );
             document.body.appendChild( renderer.domElement );
             var geometry = new THREE.BoxGeometry( 1, 1, 1 );
@@ -34,8 +37,26 @@
                 light.position.set(0,100,100);
                 scene.add(light);
 
+                window.addEventListener( 'resize', onWindowResize, false );
+
 
             camera.position.z = 5;
+            
+            function render() {
+             renderer.render( scene, camera );
+         }
+         function onWindowResize() {
+
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+
+  renderer.setSize( window.innerWidth, window.innerHeight );
+
+  render();
+
+}
+            
+            controls.update();
             function animate()
             {
             	requestAnimationFrame( animate );

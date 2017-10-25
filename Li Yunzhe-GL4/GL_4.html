@@ -24,8 +24,7 @@
         <div id="WebGL-output"></div>
 		<script>
             var stats = initStats();
-
-			var scene = new THREE.Scene();
+            var scene = new THREE.Scene();
             
             var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
            
@@ -40,27 +39,30 @@
             scene.add(light);  
 
             var helper = new THREE.DirectionalLightHelper( light, 5 );
-            scene.add( helper );              
+            scene.add( helper );            
 
-            function MoveOBJ() {
-
-                scene.remove(scene.getObjectByName('MoveLight'));
-
-                var objLoader = new THREE.OBJLoader();
-                var textureLoader = new THREE.TextureLoader();
-                camera.position.z = 50;
-                objLoader.load( "merge3d.obj", function( object ) {
-                    var lam = new THREE.MeshLambertMaterial({
-                        color: 0x7777ff,
-                        map: textureLoader.load('merge3d.jpg'),
-                        normalmap: textureLoader.load('merge3d_NRM_adjust.png'),
-                        bumpMap: textureLoader.load('CrazyBumpmerge3d_NRM.png')
-                    });
-                    object.name = 'MoveOBJ';
+            var objLoader = new THREE.OBJLoader();
+            var textureLoader = new THREE.TextureLoader();
+            camera.position.z = 50;
+            objLoader.load( "merge3d.obj", function( object ) {
+                  var lam = new THREE.MeshLambertMaterial({
+                  color: 0x7777ff,
+                  map: textureLoader.load('merge3d.jpg'),
+                  normalmap: textureLoader.load('merge3d_NRM_adjust.png'),
+                  bumpMap: textureLoader.load('CrazyBumpmerge3d_NRM.png')
+                });
                     object.children[0].material = lam;
                     scene.add( object );
                 });
-                controls = new THREE.OrbitControls( camera );
+
+                controls = new THREE.OrbitControls( camera );            
+                controlsa = new THREE.OrbitControls( light );           
+            
+             function MoveOBJ() {
+
+                controlsa.enabled = false;
+                controls.enabled = true;                              
+                
                 controls.addEventListener( 'change', render );
 
                 window.addEventListener( 'resize', onWindowResize, false );
@@ -82,24 +84,10 @@
 
             function MoveLight() {
 
-                scene.remove(scene.getObjectByName('MoveOBJ'));
-
-                var objLoader = new THREE.OBJLoader();
-                var textureLoader = new THREE.TextureLoader();
-                camera.position.z = 50;
-                objLoader.load( "merge3d.obj", function( object ) {
-                    var lam = new THREE.MeshLambertMaterial({
-                        color: 0x7777ff,
-                        map: textureLoader.load('merge3d.jpg'),
-                        normalmap: textureLoader.load('merge3d_NRM_adjust.png'),
-                        bumpMap: textureLoader.load('CrazyBumpmerge3d_NRM.png')
-                    });
-                    object.name = 'MoveLight';
-                    object.children[0].material = lam;
-                    scene.add( object );
-                });
-                controls = new THREE.OrbitControls( light );
-                controls.addEventListener( 'change', render );
+                controls.enabled = false;
+                controlsa.enabled = true;
+                
+                controlsa.addEventListener( 'change', render );
 
                 window.addEventListener( 'resize', onWindowResize, false );
 
@@ -109,7 +97,7 @@
                     renderer.render( scene, camera );
                 }
             
-                controls.update();  
+                controlsa.update();  
                 
                 function onWindowResize() {
                 camera.aspect = window.innerWidth / window.innerHeight;

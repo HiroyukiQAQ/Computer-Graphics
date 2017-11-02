@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+	
+    <head>
+		<meta charset=utf-8>
+		<title>GL5</title>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+        <script type="text/javascript" src="three.js"></script>
+        <script type="text/javascript" src="OBJLoader.js"></script>
+        <script type="text/javascript" src="OrbitControls.js"></script>
+        <script type="text/javascript" src="stats.js"></script>    
+	</head>
+	
+    <body>
+		
+        <div>
+        <button onclick="Texture()">Texture</button>
+        <button onclick="NoTexture()">NoTexture</button>    
+        <button onclick="Face()">Face</button>
+        <button onclick="Body()">Body</button>
+        <button onclick="MoveLight()">MoveLight</button>
+        </div>
+        <div id="Stats-output"></div>
+        <div id="WebGL-output"></div>
+		<script>
+            var stats = initStats();
+            
+            var scene = new THREE.Scene();
+            
+            var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+                camera.position.z = 250;
+                camera.position.y = - 40;
+                camera.position.x = 2;
+                camera.lookAt(new THREE.Vector3(2,-60,24));
+
+                // camera.lookAt(-8,85,-4);
+           
+            var renderer = new THREE.WebGLRenderer();
+
+            renderer.setSize( window.innerWidth, window.innerHeight );
+            document.getElementById("WebGL-output").appendChild(renderer.domElement);
+
+            var light = new THREE.DirectionalLight(0xffffff,3);
+            light.position.set(0,0,300);
+            // light.target.position.set(2,-20,24);
+            light.castShadow = true;
+            scene.add( light );  
+            // scene.add( light.target );
+
+            var helper = new THREE.DirectionalLightHelper( light, 5 );
+            scene.add( helper ); 
+
+             var   controls = new THREE.OrbitControls( camera );
+                   controls.enableKeys = true;
+                   controls.keys = {LEFT: 37, //left arrow
+                                    UP: 38, // up arrow
+                                    RIGHT: 39, // right arrow
+                                    BOTTOM: 40 // down arrow
+                                };
+                   // controls.enablePan = false;
+                   controls.minPolarAngle = - Math.PI / 2; 
+                   controls.maxPolarAngle = Math.PI / 2;
+                   // controls.maxDistance = 500;
+                   // controls.minDistance = 50;
+
+             var   controlsa = new THREE.OrbitControls( light );
+                   controlsa.enablePan = false;
+                   controlsa.enableZoom = false;                       
+
+            function Texture() {
+
+                scene.remove(scene.getObjectByName('NoTexture1'));
+                scene.remove(scene.getObjectByName('NoTexture'));
+
+                var objLoader = new THREE.OBJLoader();
+                var textureLoader = new THREE.TextureLoader();
+                
+                objLoader.load( "Body.obj", function( object1 ) {
+                    var lam1 = new THREE.MeshPhongMaterial({
+                        color: 0x7777ff,
+                        map: textureLoader.load('Body_tex.png')
+                    });
+                    object1.name = 'Texture1';
+                    object1.children[0].material = lam1;
+                    scene.add( object1 );
+                });
+                
+                objLoader.load( "merge3d1.obj", function( object ) {
+                    var lam = new THREE.MeshPhongMaterial({
+                        color: 0x7777ff,
+                        map: textureLoader.load('merge3d1.jpg')
+                    });
+                    object.name = 'Texture';
+                    object.children[0].material = lam;
+                    scene.add( object );
+                }); 
+                 
+                renderer.render( scene, camera );                              
+
+            }
+
+            function NoTexture() {
+
+                scene.remove(scene.getObjectByName('Texture1'));
+                scene.remove(scene.getObjectByName('Texture'));
+
+                var objLoader = new THREE.OBJLoader();
+                var textureLoader = new THREE.TextureLoader();
+                
+                objLoader.load( "Body.obj", function( object1 ) {
+                    var lam1 = new THREE.MeshPhongMaterial({
+                        color: 0x7777ff
+                    });
+                    object1.name = 'NoTexture1';
+                    object1.children[0].material = lam1;
+                    scene.add( object1 );
+                });
+                
+                objLoader.load( "merge3d1.obj", function( object ) {
+                    var lam = new THREE.MeshPhongMaterial({
+                        color: 0x7777ff
+                    });
+                    object.name = 'NoTexture';
+                    object.children[0].material = lam;
+                    scene.add( object );
+                });   
+                
+                renderer.render( scene, camera );                             
+
+            }                      
+            
+            // function MoveOBJ() {
+
+            //     controlsa.enabled = false;
+            //     controls.enabled = true;                            
+                
+            //     controls.addEventListener( 'change', render );
+
+            //     window.addEventListener( 'resize', onWindowResize, false );
+           
+            //     function render() {
+            //         stats.update();            
+            //         // controls.update();                     
+            //         renderer.render( scene, camera );
+            //     }
+
+            //     stats.update();            
+            //     // controls.update();  
+
+            //     function onWindowResize() {
+            //     camera.aspect = window.innerWidth / window.innerHeight;
+            //     camera.updateProjectionMatrix();
+            //     renderer.setSize( window.innerWidth, window.innerHeight );
+            //     render();}             
+            //     }
+
+            function MoveLight() {
+
+                controls.enabled = false;
+                controlsa.enabled = true;
+                
+                controlsa.addEventListener( 'change', render );
+
+                window.addEventListener( 'resize', onWindowResize, false );
+
+            
+                function render() {
+                    renderer.render( scene, camera );
+                    stats.update();           
+                    // controlsa.update();                      
+                }
+                
+                stats.update();           
+                // controlsa.update();  
+                
+                function onWindowResize() {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize( window.innerWidth, window.innerHeight );
+                render();}                                                         
+                }
+
+            function Face()  {
+                 
+                // light.target.position.set(-8,60,-4);
+                // scene.add( light );  
+                // scene.add( light.target );
+                controlsa.enabled = false;
+                controls.enabled = true;    
+                
+                camera.position.x = -8;
+                camera.position.y = 85;
+                camera.position.z = 25;
+                camera.lookAt(new THREE.Vector3(-8,85,-4));
+                // camera.lookAt(-8,60,-4);
+                // controls.maxDistance = 60;
+                // controls.minDistance = 7;                                        
+                
+                controls.addEventListener( 'change', render );
+
+                window.addEventListener( 'resize', onWindowResize, false );
+           
+                function render() {
+                    stats.update();            
+                    // controls.update();                     
+                    renderer.render( scene, camera );
+                }
+
+                stats.update();            
+                // controls.update();  
+
+                function onWindowResize() {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize( window.innerWidth, window.innerHeight );
+                render();}             
+            }  
+
+            function Body()  {
+                
+                // light.target.position.set(2,-20,24);
+                // scene.add( light );  
+                // scene.add( light.target );
+                controlsa.enabled = false;
+                controls.enabled = true;    
+
+                camera.position.z = 150;
+                camera.position.y = - 60;
+                camera.position.x = 2;
+                camera.lookAt(new THREE.Vector3(2,-60,24));                
+                 // camera.lookAt(2,-20,24);
+                controls.maxDistance = 500;
+                controls.minDistance = 50;                   
+   
+                controls.addEventListener( 'change', render );
+
+                window.addEventListener( 'resize', onWindowResize, false );
+           
+                function render() {
+                    stats.update();            
+                    // controls.update();                     
+                    renderer.render( scene, camera );
+                }
+
+                stats.update();            
+                // controls.update();  
+
+                function onWindowResize() {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize( window.innerWidth, window.innerHeight );
+                render();}                         
+            }  
+
+            
+
+            function initStats() {
+
+            var stats = new Stats();
+
+            stats.setMode(0); 
+
+            stats.domElement.style.position = 'absolute';
+            stats.domElement.style.left = '0px';
+            stats.domElement.style.top = '50px';
+
+            document.getElementById("Stats-output").appendChild(stats.domElement);
+
+            return stats;
+            }                           
+
+           
+		</script>
+	</body>
+</html>

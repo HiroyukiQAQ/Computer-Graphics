@@ -43,7 +43,7 @@
             renderer.setSize( window.innerWidth, window.innerHeight );
             document.getElementById("WebGL-output").appendChild(renderer.domElement);
 
-            var light = new THREE.DirectionalLight(0xffffff,3);
+            var light = new THREE.DirectionalLight(0xffffff,5);
             light.position.set(0,0,300);
             // light.target.position.set(2,-20,24);
             light.castShadow = true;

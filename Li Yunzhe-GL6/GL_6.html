@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+	
+    <head>
+		<meta charset=utf-8>
+		<title>GL6</title>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+	</head>
+	
+    <body>
+        
+        <div>
+        <button onclick="Custom()">Custom</button>
+        <button onclick="Phong()">Phong</button>
+        <button onclick="MoveLight()">MoveLight</button>
+        <button onclick="MoveCamera()">MoveCamera</button>
+        </div>
+        
+        <div id="Stats-output"></div>
+        <div id="WebGL-output"></div>
+        
+        <script type="text/javascript" src="three.js"></script>
+        <script type="text/javascript" src="OBJLoader.js"></script>
+        <script type="text/javascript" src="OrbitControls.js"></script>
+        <script type="text/javascript" src="stats.js"></script>
+        
+        <script id="vertexShader" type="x-shader/x-vertex">
+            varying vec2 vUv;
+            
+            void main()
+            {
+                vUv = uv;
+                vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+                gl_Position = projectionMatrix * mvPosition;
+            }
+        </script>
+        
+        <script id="fragmentShader" type="x-shader/x-fragment">
+            uniform float time;
+            
+            varying vec2 vUv;
+            
+            void main( void ) {
+                
+                vec2 position = - 1.0 + 2.0 * vUv;
+                
+                float red = abs( sin( position.x * position.y + time / 5.0 ) );
+                float green = abs( sin( position.x * position.y + time / 4.0 ) );
+                float blue = abs( sin( position.x * position.y + time / 3.0 ) );
+                gl_FragColor = vec4( red, green, blue, 1.0 );
+                
+            }
+        </script>
+        
+		<script>
+            var stats = initStats();
+            
+            var uniforms = {time: { value: 1.0 }};
+            
+            var scene = new THREE.Scene();
+            
+            var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+            
+            var renderer = new THREE.WebGLRenderer();
+            
+            var clock = new THREE.Clock();
+            
+            renderer.setSize( window.innerWidth, window.innerHeight );
+            renderer.setPixelRatio( window.devicePixelRatio );
+            document.getElementById("WebGL-output").appendChild(renderer.domElement);
+            
+            var ambient = new THREE.AmbientLight(0xffffff);
+            scene.add( ambient );
+            
+            var light = new THREE.PointLight(0xffffff);
+            light.position.set(0,100,0);
+            light.castShadow = true;
+            scene.add( light );
+            
+            var   controls = new THREE.OrbitControls( camera );
+        
+            var   controlsa = new THREE.OrbitControls( light );
+            
+            function Custom(){
+                
+                scene.remove(scene.getObjectByName('Phong'));
+                
+                var objLoader = new THREE.OBJLoader();
+                var textureLoader = new THREE.TextureLoader();
+                camera.position.z = 50;
+                                                    
+                objLoader.load( "merge3d.obj", function( object ) {
+                               var cus = new THREE.ShaderMaterial( {
+                                                              uniforms: uniforms,
+                                                              vertexShader: document.getElementById( 'vertexShader' ).textContent,
+                                                              fragmentShader: document.getElementById( 'fragmentShader' ).textContent
+                                                              } );
+                               object.name = 'Custom';
+                               object.children[0].material = cus;
+                               scene.add( object );
+                               });
+                render();
+            }
+        
+            function Phong(){
+                
+                scene.remove(scene.getObjectByName('Custom'));
+
+                var objLoader = new THREE.OBJLoader();
+                var textureLoader = new THREE.TextureLoader();
+                camera.position.z = 50;
+                
+                objLoader.load( "merge3d.obj", function( object ) {
+                               var pho = new THREE.MeshPhongMaterial({
+                                                                       color: 0x7777ff
+                                                                       });
+                               object.name = 'Phong';
+                               object.children[0].material = pho;
+                               scene.add( object );
+                               });
+
+                render();
+            }
+        
+            function MoveCamera(){
+                
+                controlsa.enabled = false;
+                controls.enabled = true;
+                
+                controls.addEventListener( 'change', render );
+                
+                window.addEventListener( 'resize', onWindowResize, false );
+                
+                controls.update();
+                
+                function onWindowResize() {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize( window.innerWidth, window.innerHeight );
+                    render();}
+            }
+        
+            function MoveLight(){
+                
+                controls.enabled = false;
+                controlsa.enabled = true;
+                
+                controlsa.addEventListener( 'change', render );
+                
+                window.addEventListener( 'resize', onWindowResize, false );
+                
+                controlsa.update();
+                
+                function onWindowResize() {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize( window.innerWidth, window.innerHeight );
+                    render();}
+            }
+        
+        
+            function render() {
+                var delta = clock.getDelta();
+                uniforms.time.value += delta * 5;
+                stats.update();
+                renderer.render( scene, camera );
+            }
+        
+        
+            function animate() {
+                
+                requestAnimationFrame( animate );
+                
+                render();
+                stats.update();
+                
+            }
+        
+            animate();
+        
+        
+            function initStats() {
+                
+                var stats = new Stats();
+                
+                stats.setMode(0);
+                
+                stats.domElement.style.position = 'absolute';
+                stats.domElement.style.left = '0px';
+                stats.domElement.style.top = '50px';
+                
+                document.getElementById("Stats-output").appendChild(stats.domElement);
+                
+                return stats;
+            }
+
+            
+            
+		</script>
+	</body>
+</html>
